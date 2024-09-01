@@ -117,6 +117,7 @@ button {
     border-radius: 5px;
     font-size: 16px;
     cursor: pointer;
+    margin-bottom: 10px; /* Espacio entre botones */
 }
 
 button:hover {
@@ -125,15 +126,24 @@ button:hover {
 
 .buttons-container {
     display: flex;
-    justify-content: space-between;
+    flex-direction: column;
+    gap: 10px; /* Espacio entre botones */
     margin-bottom: 20px;
 }
 
 #connect-wallet-btn, #disconnect-wallet-btn {
-    width: 48%;
+    width: 100%;
 }
 
 #buy-duff-btn {
     margin-top: 20px;
-    width: 100%;
+}
+
+#white-paper-btn {
+    background-color: #007bff; /* Color de fondo azul */
+    margin-top: 10px; /* Espacio entre el botón de comprar y el de White Paper */
+}
+
+#white-paper-btn:hover {
+    background-color: #0056b3; /* Color de fondo azul oscuro al pasar el ratón */
 }

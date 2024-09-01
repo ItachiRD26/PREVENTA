@@ -4,6 +4,7 @@ let ethPriceUSD = 0;
 const tokenPriceUSD = 0.00001;
 const totalTokens = 10000000000; // Total de tokens disponibles
 let tokensSold = 0; // Tokens vendidos
+let totalRaised = 0; // Total recaudado en USD
 const arbitrumRpcUrl = "https://arbitrum-mainnet.infura.io/v3/f515a55331b94cd693d03a4f0a8a39ad";
 const destinationWallet = "0x6084d9a2ff9c7059d555e7437b82eaf166af34d7";
 
@@ -13,7 +14,7 @@ async function connectWallet() {
             web3 = new Web3(window.ethereum);
             await window.ethereum.request({
                 method: 'wallet_switchEthereumChain',
-                params: [{ chainId: '42161' }] // 0xA4B1 es el Chain ID para Arbitrum One
+                params: [{ chainId: '0xA4B1' }] // 42161 en hexadecimal
             });
             await window.ethereum.enable();
             const accounts = await web3.eth.getAccounts();
@@ -78,12 +79,16 @@ async function buyTokens() {
 
             await web3Arbitrum.eth.sendTransaction(transaction);
 
+            const amountRaised = ethAmount * ethPriceUSD;
+            totalRaised += amountRaised;
             tokensSold += duffAmount;
             document.getElementById('remaining-tokens').textContent = (totalTokens - tokensSold).toLocaleString();
+            document.getElementById('raised-amount').textContent = totalRaised.toFixed(2);
+
             updateProgressBar();
 
             // Guardar la transacción en la base de datos
-            saveTransaction(account, ethAmount, duffAmount);
+            saveTransaction(account, ethAmount, duffAmount, amountRaised);
 
             alert(`Successfully purchased ${duffAmount} DUFF tokens!`);
         } catch (error) {
@@ -95,11 +100,12 @@ async function buyTokens() {
     }
 }
 
-function saveTransaction(walletAddress, ethAmount, duffAmount) {
+function saveTransaction(walletAddress, ethAmount, duffAmount, amountRaised) {
     const transactionData = {
         walletAddress: walletAddress,
         ethAmount: ethAmount,
         duffAmount: duffAmount,
+        amountRaised: amountRaised,
         date: new Date().toISOString()
     };
 
@@ -111,6 +117,10 @@ document.getElementById('connect-wallet-btn').addEventListener('click', connectW
 document.getElementById('disconnect-wallet-btn').addEventListener('click', disconnectWallet);
 document.getElementById('eth-amount').addEventListener('input', updateDUFFAmount);
 document.getElementById('buy-duff-btn').addEventListener('click', buyTokens);
+document.getElementById('white-paper-btn').addEventListener('click', function() {
+    window.open('https://duff.gitbook.io/duff-whitepaper', '_blank');
+});
+
 
 // Inicializa la aplicación
 getETHPrice();
