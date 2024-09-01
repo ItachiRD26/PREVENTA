@@ -1,0 +1,139 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.container {
+    width: 400px;
+}
+
+.presale-card {
+    background-color: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    text-align: center;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.logo {
+    width: 50px;
+    margin-right: 10px;
+}
+
+.price, .network, .dates, .tokens-remaining, .raised-goal {
+    margin: 15px 0;
+}
+
+.network {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.network-logo {
+    width: 30px;
+    margin-right: 10px;
+}
+
+.dates {
+    display: flex;
+    justify-content: space-between;
+}
+
+.date p {
+    margin: 5px 0;
+}
+
+.progress-bar {
+    background-color: #ddd;
+    border-radius: 5px;
+    overflow: hidden;
+    height: 20px;
+}
+
+.progress {
+    background-color: #ff4c4c;
+    height: 100%;
+}
+
+.tokens-remaining {
+    color: #ff4c4c;
+}
+
+.raised-goal {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+}
+
+.conversion {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 20px 0;
+}
+
+.input-group {
+    flex: 1;
+    margin: 0 10px;
+    text-align: left;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+input {
+    width: 100%;
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+}
+
+.arrow {
+    font-size: 24px;
+    color: #333;
+}
+
+button {
+    width: 100%;
+    padding: 10px;
+    background-color: #ff4c4c;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #e04444;
+}
+
+.buttons-container {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+#connect-wallet-btn, #disconnect-wallet-btn {
+    width: 48%;
+}
+
+#buy-duff-btn {
+    margin-top: 20px;
+    width: 100%;
+}
