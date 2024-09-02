@@ -3,6 +3,9 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/fireba
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-analytics.js";
 import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
 
+// Import Web3
+import Web3 from "https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js";
+
 // Your web app's Firebase configuration
 const firebaseConfig = {
     apiKey: "AIzaSyAeO-L_ZH4QBsOasaKL0clP21mUcMQy3Jk",
@@ -33,7 +36,7 @@ async function connectWallet() {
     if (window.ethereum) {
         try {
             web3 = new Web3(window.ethereum);
-
+            
             // Cambiar la red si es necesario
             const chainId = await web3.eth.getChainId();
             if (chainId !== 42161) { // 42161 es Arbitrum One
@@ -42,12 +45,11 @@ async function connectWallet() {
                     params: [{ chainId: '0xA4B1' }] // 42161 en hexadecimal
                 });
             }
-
+            
             // Solicitar la conexión de la cuenta
-            await window.ethereum.request({ method: 'eth_requestAccounts' });
-            const accounts = await web3.eth.getAccounts();
+            const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
             account = accounts[0];
-
+            
             // Actualizar la UI
             document.getElementById('connect-wallet-btn').style.display = 'none';
             document.getElementById('disconnect-wallet-btn').style.display = 'block';
