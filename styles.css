@@ -1,6 +1,10 @@
+
+
+
+
 body {
     font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
+    background-image: url(/img/fondoweb.jpg);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -146,4 +150,35 @@ button:hover {
 
 #white-paper-btn:hover {
     background-color: #0056b3; /* Color de fondo azul oscuro al pasar el ratón */
+}
+
+/* Estilo general para el contenedor de información de la wallet */
+#wallet-info {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    gap: 10px; /* Espacio entre los divs */
+    background-color: #f5f5f5; /* Fondo claro para contraste */
+    padding: 10px;
+    border-radius: 10px; /* Bordes redondeados del contenedor */
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1); /* Sombra suave */
+}
+
+/* Estilo para cada div dentro del contenedor */
+#wallet-info div {
+    background-color: #ffffff; /* Fondo blanco para cada div */
+    padding: 5px 10px;
+    border-radius: 5px; /* Bordes redondeados de los divs */
+    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1); /* Sombra sutil para los divs */
+    font-size: 14px; /* Tamaño de fuente */
+    color: #333; /* Color del texto */
+    display: flex;
+    align-items: center;
+}
+
+/* Estilo para los textos dentro de los divs */
+#wallet-info span {
+    font-weight: bold; /* Texto en negrita */
+    margin-left: 5px; /* Espacio a la izquierda del texto */
 }

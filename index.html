@@ -5,8 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DUFF Presale</title>
     <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
 </head>
 <body>
+    <!-- Agrega estos divs en la parte superior de tu HTML -->
+<div id="wallet-info">
+    <div id="wallet-address">Wallet Address: <span id="address-display"></span></div>
+    <div id="network-info">Network: <span id="network-display"></span></div>
+</div>
+
     <div class="container">
         <div class="presale-card">
             <div class="header">
@@ -32,9 +39,9 @@
             <div class="progress-bar">
                 <div class="progress" id="progress-bar"></div>
             </div>
-            <p class="tokens-remaining">Remaining Tokens: <span id="remaining-tokens">10,000,000,000</span></p>
+            <p class="tokens-remaining">Remaining Tokens: <span id="remaining-tokens">5,000,000,000,000</span></p>
             <div class="raised-goal">
-                <div class="raised">$<span id="raised-amount">0</span></div>
+                <div class="raised"><span id="raised-amount">0</span></div>
                 <div class="goal">$500,000</div>
             </div>
             <div class="conversion">
@@ -57,6 +64,6 @@
         </div>
     </div>
 
-    <script type="module" src="scripts.js"></script>
+    <script src="scripts.js"></script>
 </body>
 </html>
