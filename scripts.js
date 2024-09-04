@@ -1,7 +1,7 @@
 let web3;
 let account;
 let ethPriceUSD = 0;
-const tokenPriceUSD = 0.00001; // Precio del token en USD
+const tokenPriceUSD = 0.00034; // Precio del token en USD
 const totalTokens = 5000000000000; // Total de tokens disponibles
 let tokensSold = 0; // Tokens vendidos
 let totalRaised = 0; // Total recaudado en USD
@@ -137,43 +137,66 @@ function updateProgressBar() {
 async function buyTokens() {
     const ethAmount = parseFloat(document.getElementById('eth-amount').value);
     const duffAmount = parseFloat(document.getElementById('duff-amount').value);
-  
-    if (!isNaN(ethAmount) && ethAmount >= 0.004 && ethAmount <= 10 && account) {
-      try {
-        const tx = {
-          from: account,
-          to: destinationWallet,
-          value: web3.utils.toWei(ethAmount.toString(), 'ether'),
-          gas: null,
-          gasPrice: null,
-        };
-  
-        // Solicita la aprobación del usuario para la transacción
-        const txHash = await window.ethereum.request({
-          method: 'eth_sendTransaction',
-          params: [tx],
-          from: account
-        });
-  
-        // Espera a que el usuario apruebe o rechace la transacción
-        const txReceipt = await web3.eth.getTransactionReceipt(txHash);
-        if (txReceipt.status) {
-          const amountRaised = ethAmount * ethPriceUSD;
-          totalRaised += amountRaised;
-          tokensSold += duffAmount;
-          updateProgressBar();
-          alert(`Successfully purchased ${duffAmount} DUFF tokens!`);
-        } else {
-          alert('Transaction failed.');
+
+    if (!isNaN(ethAmount) && ethAmount >= 0.004 && ethAmount <= 0.54 && account) {
+        try {
+            const tx = {
+                from: account,
+                to: destinationWallet,
+                value: web3.utils.toWei(ethAmount.toString(), 'ether'),
+                gas: '200000',
+                gasPrice: web3.utils.toWei('0.001', 'gwei'), // Set a fixed gas price of 20 Gwei
+            };
+
+            // Solicita la aprobación del usuario para la transacción
+            const txHash = await window.ethereum.request({
+                method: 'eth_sendTransaction',
+                params: [tx],
+                from: account
+            });
+
+            // Espera a que el usuario apruebe o rechace la transacción
+            const txReceipt = await web3.eth.getTransactionReceipt(txHash);
+            if (txReceipt.status) {
+                totalRaised += ethAmount * ethPriceUSD; // Update total raised amount in USD
+                tokensSold += duffAmount;
+                updateProgressBar();
+                alert(`Successfully purchased ${duffAmount} DUFF tokens!`);
+            } else {
+                alert('Transaction failed.');
+            }
+        } catch (error) {
+            console.error("Transaction request failed:", error);
+            alert("Transaction request failed. Please try again.");
         }
-      } catch (error) {
-        console.error("Transaction request failed:", error);
-        alert("Transaction request failed. Please try again.");
-      }
     } else {
-      alert('Please enter a valid ETH amount between 0.004 and 10, and ensure your wallet is connected.');
+        alert('Please enter a valid ETH amount between 0.004 and 0.54, and ensure your wallet is connected.');
     }
-  }
+}
+
+function updateDUFFAmount() {
+    const ethAmount = parseFloat(document.getElementById('eth-amount').value);
+    if (!isNaN(ethAmount) && ethAmount > 0) {
+        const duffAmount = (ethAmount * ethPriceUSD) / tokenPriceUSD;
+        document.getElementById('duff-amount').value = duffAmount.toFixed(0);
+        document.getElementById('eth-value-usd').textContent = `$${(ethAmount * ethPriceUSD).toFixed(2)} USD`;
+    } else {
+        document.getElementById('duff-amount').value = 0;
+        document.getElementById('eth-value-usd').textContent = `$0.00 USD`;
+    }
+}
+
+async function getETHPrice() {
+    try {
+        const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd');
+        const data = await response.json();
+        ethPriceUSD = data.ethereum.usd;
+        document.getElementById('eth-price').textContent = `$${ethPriceUSD.toFixed(2)}`;
+    } catch (error) {
+        console.error("Error fetching ETH price:", error);
+        document.getElementById('eth-price').textContent = "Error";
+    }
+}
 
 // Eventos de los botones
 document.addEventListener('DOMContentLoaded', function() {
