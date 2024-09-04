@@ -1,44 +1,39 @@
 let web3;
 let account;
 let ethPriceUSD = 0;
-const tokenPriceUSD = 0.00034; // Precio del token en USD
+const tokenPriceUSD = 0.00001; // Precio del token en USD
 const totalTokens = 5000000000000; // Total de tokens disponibles
 let tokensSold = 0; // Tokens vendidos
 let totalRaised = 0; // Total recaudado en USD
 const goal = 500000; // Objetivo en USD
 const arbitrumRpcUrl = "https://arbitrum-mainnet.infura.io/v3/f515a55331b94cd693d03a4f0a8a39ad";
 const destinationWallet = "0x6084d9a2ff9c7059d555e7437b82eaf166af34d7";
-const binanceChainId = '0x38'; // 56 en hexadecimal para Binance Smart Chain
 const arbitrumChainId = '0xA4B1'; // 42161 en hexadecimal para Arbitrum One
 
 async function connectWallet() {
     if (window.ethereum) {
         try {
             web3 = new Web3(window.ethereum);
-            
-            // Solicitar la conexión de la cuenta
             const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
             account = accounts[0];
+            
+            let chainId = await web3.eth.getChainId();
+            console.log('Current Chain ID:', chainId);
 
-            // Obtener el ID de la cadena
-            const chainId = await web3.eth.getChainId();
-            let networkName;
-            if (chainId === 42161) {
-                networkName = 'Arbitrum One';
-            } else if (chainId === 56) {
-                networkName = 'Binance Smart Chain';
-            } else {
-                networkName = 'Unknown Network';
-                // Solicitar al usuario que cambie de red si no está en la red correcta
+            if (chainId !== parseInt(arbitrumChainId, 16)) {
                 await switchNetwork();
+                chainId = await web3.eth.getChainId(); // Actualiza el chainId después de intentar cambiar de red
+                console.log('Switched Chain ID:', chainId);
             }
 
-            // Actualizar la UI
+            // Verifica la red después de intentar cambiarla
+            const networkName = chainId === parseInt(arbitrumChainId, 16) ? 'Wrong Network' : 'Arbitrum One';
+
             document.getElementById('connect-wallet-btn').style.display = 'none';
             document.getElementById('disconnect-wallet-btn').style.display = 'block';
             document.getElementById('address-display').textContent = `${account.slice(0, 6)}...${account.slice(-4)}`;
             document.getElementById('network-display').textContent = networkName;
-            alert(`Wallet connected: ${account}`);
+            alert(`Wallet connected: ${account} on ${networkName}`);
         } catch (error) {
             console.error("Error connecting wallet:", error);
             alert("Failed to connect wallet. Please ensure MetaMask is installed and try again.");
@@ -48,28 +43,43 @@ async function connectWallet() {
     }
 }
 
+
 async function switchNetwork() {
-    const chainId = await web3.eth.getChainId();
-    if (chainId !== 42161 && chainId !== 56) {
-        try {
-            // Solicitar al usuario que agregue y cambie a la red de Arbitrum One
+    try {
+        const chainId = await web3.eth.getChainId();
+        console.log('Switching Network. Current Chain ID:', chainId);
+        
+        if (chainId !== parseInt(arbitrumChainId, 16)) {
             await window.ethereum.request({
-                method: 'wallet_addEthereumChain',
-                params: [{
-                    chainId: arbitrumChainId,
-                    chainName: 'Arbitrum One',
-                    rpcUrls: ['https://arbitrum-mainnet.infura.io/v3/f515a55331b94cd693d03a4f0a8a39ad'],
-                    nativeCurrency: {
-                        name: 'ETH',
-                        symbol: 'ETH',
-                        decimals: 18
-                    },
-                    blockExplorerUrls: ['https://arbiscan.io']
-                }]
+                method: 'wallet_switchEthereumChain',
+                params: [{ chainId: arbitrumChainId }],
             });
-        } catch (error) {
-            console.error("Error adding or switching network:", error);
-            alert("Failed to switch or add network. Please switch manually.");
+        }
+    } catch (error) {
+        if (error.code === 4902) { // Network not added yet
+            try {
+                console.log('Adding Arbitrum One Network');
+                await window.ethereum.request({
+                    method: 'wallet_addEthereumChain',
+                    params: [{
+                        chainId: arbitrumChainId,
+                        chainName: 'Arbitrum One',
+                        rpcUrls: [arbitrumRpcUrl],
+                        nativeCurrency: {
+                            name: 'ETH',
+                            symbol: 'ETH',
+                            decimals: 18
+                        },
+                        blockExplorerUrls: ['https://arbiscan.io']
+                    }]
+                });
+            } catch (addError) {
+                console.error("Error adding network:", addError);
+                alert("Failed to add the network. Please add it manually.");
+            }
+        } else {
+            console.error("Error switching network:", error);
+            alert("Failed to switch network. Please switch manually.");
         }
     }
 }
@@ -100,10 +110,14 @@ function updateDUFFAmount() {
     if (!isNaN(ethAmount) && ethAmount > 0) {
         const duffAmount = (ethAmount * ethPriceUSD) / tokenPriceUSD;
         document.getElementById('duff-amount').value = duffAmount.toFixed(0);
+        document.getElementById('eth-value-usd').textContent = `$${(ethAmount * ethPriceUSD).toFixed(2)} USD`;
     } else {
         document.getElementById('duff-amount').value = 0;
+        document.getElementById('eth-value-usd').textContent = `$0.00 USD`;
     }
 }
+
+
 
 function updateProgressBar() {
     const progressBar = document.getElementById('progress-bar');
@@ -126,42 +140,46 @@ async function buyTokens() {
 
     if (!isNaN(ethAmount) && ethAmount >= 0.004 && ethAmount <= 10 && account) {
         try {
-            const transaction = {
+            const tx = {
                 from: account,
                 to: destinationWallet,
-                value: web3.utils.toWei(ethAmount.toString(), 'ether'),
-                gas: 21000, // Gas estimado para la transacción
-                gasPrice: web3.utils.toWei('5', 'gwei') // Precio del gas
+                value: web3.utils.toWei(ethAmount.toString(), 'ether')
+                // Puedes omitir gas y gasPrice para que la billetera los calcule automáticamente
             };
 
-            // Enviar la transacción y esperar confirmación
-            const txHash = await web3.eth.sendTransaction(transaction);
+            // Enviar la transacción
+            await web3.eth.sendTransaction(tx)
+                .on('transactionHash', (hash) => {
+                    console.log('Transaction sent, hash:', hash);
+                    alert(`Transaction sent. Please confirm in your wallet.`);
+                })
+                .on('receipt', (receipt) => {
+                    if (receipt.status) {
+                        const amountRaised = ethAmount * ethPriceUSD;
+                        totalRaised += amountRaised;
+                        tokensSold += duffAmount;
+                        updateProgressBar();
+                        alert(`Successfully purchased ${duffAmount} DUFF tokens!`);
+                    } else {
+                        alert('Transaction failed.');
+                    }
+                })
+                .on('error', (error) => {
+                    console.error('Transaction error:', error);
+                    alert('Transaction failed. Please check your wallet and try again.');
+                });
 
-            // Confirmar la transacción
-            const receipt = await web3.eth.getTransactionReceipt(txHash.transactionHash);
-
-            if (receipt.status) {
-                const amountRaised = ethAmount * ethPriceUSD;
-                totalRaised += amountRaised;
-                tokensSold += duffAmount;
-
-                updateProgressBar();
-                alert(`Successfully purchased ${duffAmount} DUFF tokens!`);
-            } else {
-                alert("Transaction failed. Please try again.");
-            }
         } catch (error) {
-            console.error("Purchase failed:", error);
-            if (error.message.includes('insufficient funds')) {
-                alert("Insufficient funds. Please check your balance and try again.");
-            } else {
-                alert("Transaction failed. Please try again.");
-            }
+            console.error("Transaction request failed:", error);
+            alert("Transaction request failed. Please try again.");
         }
     } else {
-        alert('Please enter a valid ETH amount between 0.00001 and 10, and ensure your wallet is connected.');
+        alert('Please enter a valid ETH amount between 0.004 and 10, and ensure your wallet is connected.');
     }
 }
+
+
+
 
 // Eventos de los botones
 document.addEventListener('DOMContentLoaded', function() {
