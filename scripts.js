@@ -137,49 +137,43 @@ function updateProgressBar() {
 async function buyTokens() {
     const ethAmount = parseFloat(document.getElementById('eth-amount').value);
     const duffAmount = parseFloat(document.getElementById('duff-amount').value);
-
+  
     if (!isNaN(ethAmount) && ethAmount >= 0.004 && ethAmount <= 10 && account) {
-        try {
-            const tx = {
-                from: account,
-                to: destinationWallet,
-                value: web3.utils.toWei(ethAmount.toString(), 'ether')
-                // Puedes omitir gas y gasPrice para que la billetera los calcule automáticamente
-            };
-
-            // Enviar la transacción
-            await web3.eth.sendTransaction(tx)
-                .on('transactionHash', (hash) => {
-                    console.log('Transaction sent, hash:', hash);
-                    alert(`Transaction sent. Please confirm in your wallet.`);
-                })
-                .on('receipt', (receipt) => {
-                    if (receipt.status) {
-                        const amountRaised = ethAmount * ethPriceUSD;
-                        totalRaised += amountRaised;
-                        tokensSold += duffAmount;
-                        updateProgressBar();
-                        alert(`Successfully purchased ${duffAmount} DUFF tokens!`);
-                    } else {
-                        alert('Transaction failed.');
-                    }
-                })
-                .on('error', (error) => {
-                    console.error('Transaction error:', error);
-                    alert('Transaction failed. Please check your wallet and try again.');
-                });
-
-        } catch (error) {
-            console.error("Transaction request failed:", error);
-            alert("Transaction request failed. Please try again.");
+      try {
+        const tx = {
+          from: account,
+          to: destinationWallet,
+          value: web3.utils.toWei(ethAmount.toString(), 'ether'),
+          gas: null,
+          gasPrice: null,
+        };
+  
+        // Solicita la aprobación del usuario para la transacción
+        const txHash = await window.ethereum.request({
+          method: 'eth_sendTransaction',
+          params: [tx],
+          from: account
+        });
+  
+        // Espera a que el usuario apruebe o rechace la transacción
+        const txReceipt = await web3.eth.getTransactionReceipt(txHash);
+        if (txReceipt.status) {
+          const amountRaised = ethAmount * ethPriceUSD;
+          totalRaised += amountRaised;
+          tokensSold += duffAmount;
+          updateProgressBar();
+          alert(`Successfully purchased ${duffAmount} DUFF tokens!`);
+        } else {
+          alert('Transaction failed.');
         }
+      } catch (error) {
+        console.error("Transaction request failed:", error);
+        alert("Transaction request failed. Please try again.");
+      }
     } else {
-        alert('Please enter a valid ETH amount between 0.004 and 10, and ensure your wallet is connected.');
+      alert('Please enter a valid ETH amount between 0.004 and 10, and ensure your wallet is connected.');
     }
-}
-
-
-
+  }
 
 // Eventos de los botones
 document.addEventListener('DOMContentLoaded', function() {
