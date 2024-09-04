@@ -1,11 +1,11 @@
 let web3;
 let account;
 let ethPriceUSD = 0;
-const tokenPriceUSD = 0.00001; // Precio del token en USD
+const tokenPriceUSD = 0.00034; // Precio del token en USD
 const totalTokens = 5000000000000; // Total de tokens disponibles
 let tokensSold = 0; // Tokens vendidos
 let totalRaised = 0; // Total recaudado en USD
-const goal = 50000; // Objetivo en USD
+const goal = 500000; // Objetivo en USD
 const arbitrumRpcUrl = "https://arbitrum-mainnet.infura.io/v3/f515a55331b94cd693d03a4f0a8a39ad";
 const destinationWallet = "0x6084d9a2ff9c7059d555e7437b82eaf166af34d7";
 const binanceChainId = '0x38'; // 56 en hexadecimal para Binance Smart Chain
