@@ -1,7 +1,7 @@
 let web3;
 let account;
 let ethPriceUSD = 0;
-const tokenPriceUSD = 0.00034; // Precio del token en USD
+const tokenPriceUSD = 0.000034; // Precio del token en USD
 const totalTokens = 5000000000000; // Total de tokens disponibles
 let tokensSold = 0; // Tokens vendidos
 let totalRaised = 0; // Total recaudado en USD
