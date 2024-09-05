@@ -135,44 +135,78 @@ function updateProgressBar() {
 }
 
 async function buyTokens() {
-    const ethAmount = parseFloat(document.getElementById('eth-amount').value);
-    const duffAmount = parseFloat(document.getElementById('duff-amount').value);
+    const ethAmountInput = document.getElementById('eth-amount'); // Captura el input por su ID
+    const ethAmount = ethAmountInput.value; // Usamos el valor como string, sin convertir a número flotante
 
-    if (!isNaN(ethAmount) && ethAmount >= 0.004 && ethAmount <= 0.54 && account) {
-        try {
-            const tx = {
-                from: account,
-                to: destinationWallet,
-                value: web3.utils.toWei(ethAmount.toString(), 'ether'),
-                gas: '200000',
-                gasPrice: web3.utils.toWei('0.001', 'gwei'), // Set a fixed gas price of 20 Gwei
-            };
+    // Logs para depuración del valor capturado
+    console.log(`Valor ingresado en el input (ETH): ${ethAmount}`);
 
-            // Solicita la aprobación del usuario para la transacción
-            const txHash = await window.ethereum.request({
-                method: 'eth_sendTransaction',
-                params: [tx],
-                from: account
-            });
+    // Validación del valor ingresado
+    if (isNaN(parseFloat(ethAmount))) {
+        console.log("El valor ingresado no es un número válido.");
+        alert('Por favor, ingresa un número válido.');
+        return;
+    }
 
-            // Espera a que el usuario apruebe o rechace la transacción
-            const txReceipt = await web3.eth.getTransactionReceipt(txHash);
-            if (txReceipt.status) {
-                totalRaised += ethAmount * ethPriceUSD; // Update total raised amount in USD
-                tokensSold += duffAmount;
-                updateProgressBar();
-                alert(`Successfully purchased ${duffAmount} DUFF tokens!`);
-            } else {
-                alert('Transaction failed.');
-            }
-        } catch (error) {
-            console.error("Transaction request failed:", error);
-            alert("Transaction request failed. Please try again.");
+    const ethAmountFloat = parseFloat(ethAmount); // Convertimos a flotante para validaciones adicionales
+
+    if (ethAmountFloat < 0.004 || ethAmountFloat > 0.54) {
+        console.log("El monto de ETH está fuera del rango permitido.");
+        alert('Por favor, ingresa una cantidad de ETH entre 0.004 y 0.54.');
+        return;
+    }
+
+    if (!account) {
+        console.log("La billetera no está conectada.");
+        alert('Por favor, conecta tu billetera.');
+        return;
+    }
+
+    try {
+        // Convertir el monto de ETH a Wei usando el valor como string
+        const weiAmount = web3.utils.toWei(ethAmount, 'ether');
+
+        // Log para depuración de la conversión
+        console.log(`ETH Amount: ${ethAmount}, Wei Amount (después de conversión): ${weiAmount}`);
+
+        // Crear la transacción
+        const tx = {
+            from: account,
+            to: destinationWallet,
+            value: weiAmount, 
+            gas: '300000',
+            gasPrice: web3.utils.toWei('0.001', 'gwei'), // Ajuste del gasPrice
+        };
+
+        // Enviar la transacción
+        const txHash = await window.ethereum.request({
+            method: 'eth_sendTransaction',
+            params: [tx],
+        });
+
+        let txReceipt = null;
+        while (txReceipt === null) {
+            txReceipt = await web3.eth.getTransactionReceipt(txHash);
+            await new Promise(resolve => setTimeout(resolve, 1000)); // Esperar 1 segundo antes de intentar de nuevo
         }
-    } else {
-        alert('Please enter a valid ETH amount between 0.004 and 0.54, and ensure your wallet is connected.');
+
+        // Verificación del estado de la transacción
+        if (txReceipt.status) {
+            totalRaised += ethAmountFloat * ethPriceUSD; // Actualizar el total recaudado en USD
+            tokensSold += duffAmount;
+            updateProgressBar();
+            alert(`¡Has comprado exitosamente ${duffAmount} tokens DUFF!`);
+        } else {
+            alert('La transacción ha fallado.');
+        }
+    } catch (error) {
+        console.error("Error en la solicitud de transacción:", error);
+        alert("Error en la transacción. Por favor, intenta nuevamente.");
     }
 }
+
+
+
 
 function updateDUFFAmount() {
     const ethAmount = parseFloat(document.getElementById('eth-amount').value);
