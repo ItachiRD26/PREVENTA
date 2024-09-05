@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,8 +8,9 @@
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
 </head>
+
 <body>
-    <!-- Agrega estos divs en la parte superior de tu HTML -->
+    <!-- Contenedor principal de la preventa -->
     <div id="wallet-info">
         <div id="wallet-address">Wallet Address: <span id="address-display"></span></div>
         <div id="network-info">Network: <span id="network-display"></span></div>
@@ -47,7 +49,7 @@
             <div class="conversion">
                 <div class="input-group">
                     <label for="eth-amount">ETH</label>
-                    <input id="eth-amount" type="number" inputmode="decimal" min="0.004" max="0.54" placeholder="Enter ETH amount" />
+                    <input id="eth-amount" type="number" placeholder="0" />
                     <span id="eth-value-usd" style="color: gray; font-size: 0.9em; margin-left: 5px;">$0.00 USD</span>
                 </div>
                 <div class="arrow">→</div>
@@ -66,5 +68,7 @@
     </div>
 
     <script src="scripts.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bignumber.js/bignumber.min.js"></script>
 </body>
+
 </html>

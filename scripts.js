@@ -134,51 +134,50 @@ function updateProgressBar() {
     remainingTokensElement.textContent = (totalTokens - tokensSold).toLocaleString();
 }
 
+
+//FUNCIONES DE COMPRA 
+
+
 async function buyTokens() {
-    const ethAmountInput = document.getElementById('eth-amount'); // Captura el input por su ID
-    const ethAmount = ethAmountInput.value; // Usamos el valor como string, sin convertir a número flotante
+    const ethAmountInput = document.getElementById('eth-amount'); // Captura el input del usuario
+    const ethAmountStr = ethAmountInput.value; // Obtenemos el valor como string
 
-    // Logs para depuración del valor capturado
-    console.log(`Valor ingresado en el input (ETH): ${ethAmount}`);
-
-    // Validación del valor ingresado
-    if (isNaN(parseFloat(ethAmount))) {
-        console.log("El valor ingresado no es un número válido.");
-        alert('Por favor, ingresa un número válido.');
+    // Verificar si el valor del input es un número válido
+    if (!ethAmountStr || isNaN(parseFloat(ethAmountStr))) {
+        alert('Por favor ingresa un número válido');
         return;
     }
 
-    const ethAmountFloat = parseFloat(ethAmount); // Convertimos a flotante para validaciones adicionales
+    const ethAmount = parseFloat(ethAmountStr); // Convertimos el valor a float para la validación
 
-    if (ethAmountFloat < 0.004 || ethAmountFloat > 0.54) {
-        console.log("El monto de ETH está fuera del rango permitido.");
-        alert('Por favor, ingresa una cantidad de ETH entre 0.004 y 0.54.');
+    // Validamos si está en el rango permitido
+    if (ethAmount < 0.004 || ethAmount > 0.54) {
+        alert('Por favor ingresa una cantidad de ETH entre 0.004 y 0.54');
         return;
     }
 
     if (!account) {
-        console.log("La billetera no está conectada.");
-        alert('Por favor, conecta tu billetera.');
+        alert('Por favor conecta tu billetera');
         return;
     }
 
     try {
-        // Convertir el monto de ETH a Wei usando el valor como string
-        const weiAmount = web3.utils.toWei(ethAmount, 'ether');
+        // **Aquí hacemos la conversión correcta de ETH a Wei**
+        const weiAmount = web3.utils.toWei(ethAmount.toString(), 'ether'); // Convertimos ETH a Wei correctamente
 
-        // Log para depuración de la conversión
-        console.log(`ETH Amount: ${ethAmount}, Wei Amount (después de conversión): ${weiAmount}`);
+        // Log para depurar la conversión
+        console.log(`ETH Amount: ${ethAmount}, Wei Amount: ${weiAmount}`);
 
-        // Crear la transacción
+        // Configuración de la transacción
         const tx = {
             from: account,
-            to: destinationWallet,
-            value: weiAmount, 
-            gas: '300000',
-            gasPrice: web3.utils.toWei('0.001', 'gwei'), // Ajuste del gasPrice
+            to: destinationWallet, // Dirección destino donde enviarás el ETH
+            value: weiAmount,       // Monto en Wei (correctamente convertido)
+            gas: '300000',          // Gas límite
+            gasPrice: web3.utils.toWei('0.001', 'gwei'), // Precio del gas en Gwei
         };
 
-        // Enviar la transacción
+        // Enviamos la transacción a la red
         const txHash = await window.ethereum.request({
             method: 'eth_sendTransaction',
             params: [tx],
@@ -187,23 +186,27 @@ async function buyTokens() {
         let txReceipt = null;
         while (txReceipt === null) {
             txReceipt = await web3.eth.getTransactionReceipt(txHash);
-            await new Promise(resolve => setTimeout(resolve, 1000)); // Esperar 1 segundo antes de intentar de nuevo
+            await new Promise(resolve => setTimeout(resolve, 1000)); // Esperamos 1 segundo antes de intentar de nuevo
         }
 
-        // Verificación del estado de la transacción
+        // Verificamos el estado de la transacción
         if (txReceipt.status) {
-            totalRaised += ethAmountFloat * ethPriceUSD; // Actualizar el total recaudado en USD
+            totalRaised += ethAmount * ethPriceUSD; // Actualizamos el total recaudado en USD
             tokensSold += duffAmount;
-            updateProgressBar();
+            updateProgressBar(); // Actualizamos la barra de progreso
             alert(`¡Has comprado exitosamente ${duffAmount} tokens DUFF!`);
         } else {
             alert('La transacción ha fallado.');
         }
     } catch (error) {
         console.error("Error en la solicitud de transacción:", error);
-        alert("Error en la transacción. Por favor, intenta nuevamente.");
+        alert("Error en la transacción. Por favor intenta nuevamente.");
     }
 }
+
+
+
+
 
 
 
